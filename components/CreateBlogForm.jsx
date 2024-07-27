@@ -22,6 +22,7 @@ export default function CreateBlogForm({
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const { id } = router.query;
 
@@ -52,7 +53,7 @@ export default function CreateBlogForm({
       try {
         const url = await uploadImage(file);
         setImageUrl(url);
-        setImage(url); // Ensure the image state is updated with the URL
+        setImage(url);
       } catch (error) {
         console.error("Error uploading image:", error);
         alert("An error occurred while uploading the image.");
@@ -73,6 +74,8 @@ export default function CreateBlogForm({
       return;
     }
 
+    setIsSubmitting(true);
+
     const currentTimestamp = Date.now();
 
     const blogData = {
@@ -88,11 +91,9 @@ export default function CreateBlogForm({
       if (isEditing) {
         console.log("Updating blog:", blogData);
         await db.update(blogData, "blogs", id, user);
-        // console.log("Response blog:", response);
       } else {
         console.log("Creating new blog:", blogData);
         await db.add(blogData, "blogs", user);
-        // console.log("response: ", response);
       }
 
       if (onComplete) {
@@ -103,6 +104,8 @@ export default function CreateBlogForm({
     } catch (error) {
       console.error("Error saving blog:", error);
       alert("An error occurred while saving the blog.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -113,10 +116,27 @@ export default function CreateBlogForm({
       <div className="flex items-end justify-end w-full">
         <button
           type="submit"
-          className={`rounded-lg font-bold text-white px-8 py-4 ${isUploading ? "bg-gray-400" : "bg-green-600"}`}
-          disabled={isUploading}
+          className={`rounded-lg font-bold text-white px-8 py-4 relative ${
+            isUploading || isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+          }`}
+          disabled={isUploading || isSubmitting}
         >
-          {isUploading ? "Uploading Image Please wait..." : isEditing ? "Update Blog" : "Publish Blog"}
+          {isSubmitting ? (
+            <>
+              <span className="opacity-0">
+                {isEditing ? "Update Blog" : "Publish Blog"}
+              </span>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+              </div>
+            </>
+          ) : isUploading ? (
+            "Uploading Image Please wait..."
+          ) : isEditing ? (
+            "Update Blog"
+          ) : (
+            "Publish Blog"
+          )}
         </button>
       </div>
       <div className="w-[80%] mt-10 flex items-start gap-6 flex-col">
