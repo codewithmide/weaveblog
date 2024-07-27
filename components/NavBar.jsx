@@ -4,13 +4,17 @@ import { LuWallet2 } from "react-icons/lu";
 import { useWallet } from "../hooks/useWallet";
 
 export default function NavBar() {
-  const { user, login, logout } = useWallet();
+  const { user, login, logout, isDbReady } = useWallet();
 
   const handleWalletAction = async () => {
     if (user) {
       await logout();
     } else {
-      await login();
+      if (isDbReady) {
+        await login();
+      } else {
+        alert("Please wait, the database is initializing.");
+      }
     }
   };
 

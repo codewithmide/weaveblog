@@ -9,15 +9,18 @@ import WalletContext from "./walletContext";
 export const WalletProvider = ({ children }) => {
   const [db, setDb] = useState(null);
   const [user, setUser] = useState(null);
+  const [isDbReady, setIsDbReady] = useState(false);
 
   const setupWeaveDB = useCallback(async () => {
     try {
       const _db = new SDK({ contractTxId });
       await _db.init();
       setDb(_db);
+      setIsDbReady(true);
       console.log("WeaveDB initialized");
     } catch (error) {
       console.error("Error initializing WeaveDB:", error);
+      setIsDbReady(false);
     }
   }, []);
 
@@ -44,6 +47,11 @@ export const WalletProvider = ({ children }) => {
   };
 
   const login = async () => {
+    if (!isDbReady) {
+      alert("Database is not ready yet. Please try again in a moment.");
+      return;
+    }
+
     try {
       if (typeof window.ethereum !== 'undefined') {
         const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -58,7 +66,7 @@ export const WalletProvider = ({ children }) => {
           ({ tx, identity, err } = await db.createTempAddress(wallet_address));
           const linked = await db.getAddressLink(identity.address);
           if (isNil(linked)) {
-            alert("something went wrong");
+            alert("Something went wrong with address linking");
             return;
           }
         } else {
@@ -81,6 +89,9 @@ export const WalletProvider = ({ children }) => {
             wallet: wallet_address,
             privateKey: identity.privateKey,
           });
+        } else if (err) {
+          console.error("Error in createTempAddress:", err);
+          alert("An error occurred while creating a temporary address. Please try again.");
         }
       } else {
         alert("Please install MetaMask or another Ethereum wallet provider.");
@@ -96,7 +107,6 @@ export const WalletProvider = ({ children }) => {
       if (confirm("Would you like to sign out?")) {
         await lf.removeItem("temp_address:current");
         setUser(null);
-        setDb(null);
         console.log("User logged out");
       }
     } catch (error) {
@@ -105,13 +115,13 @@ export const WalletProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!user && !db) {
+    if (!user && !isDbReady) {
       setupWeaveDB();
     }
-  }, [user, db, setupWeaveDB]);
+  }, [user, isDbReady, setupWeaveDB]);
 
   return (
-    <WalletContext.Provider value={{ db, user, login, logout }}>
+    <WalletContext.Provider value={{ db, user, login, logout, isDbReady }}>
       {children}
     </WalletContext.Provider>
   );
