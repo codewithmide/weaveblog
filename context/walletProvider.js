@@ -44,41 +44,50 @@ export const WalletProvider = ({ children }) => {
   };
 
   const login = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-    await provider.send("eth_requestAccounts", []);
-    const wallet_address = await provider.getSigner().getAddress();
-    let identity = await lf.getItem(
-      `temp_address:${contractTxId}:${wallet_address}`
-    );
-    let tx;
-    let err;
-    if (isNil(identity)) {
-      ({ tx, identity, err } = await db.createTempAddress(wallet_address));
-      const linked = await db.getAddressLink(identity.address);
-      if (isNil(linked)) {
-        alert("something went wrong");
-        return;
+    try {
+      if (typeof window.ethereum !== 'undefined') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+        await provider.send("eth_requestAccounts", []);
+        const wallet_address = await provider.getSigner().getAddress();
+        let identity = await lf.getItem(
+          `temp_address:${contractTxId}:${wallet_address}`
+        );
+        let tx;
+        let err;
+        if (isNil(identity)) {
+          ({ tx, identity, err } = await db.createTempAddress(wallet_address));
+          const linked = await db.getAddressLink(identity.address);
+          if (isNil(linked)) {
+            alert("something went wrong");
+            return;
+          }
+        } else {
+          await lf.setItem("temp_address:current", wallet_address);
+          setUser({
+            wallet: wallet_address,
+            privateKey: identity.privateKey,
+          });
+          return;
+        }
+        if (!isNil(tx) && isNil(tx.err)) {
+          identity.tx = tx;
+          identity.linked_address = wallet_address;
+          await lf.setItem("temp_address:current", wallet_address);
+          await lf.setItem(
+            `temp_address:${contractTxId}:${wallet_address}`,
+            JSON.parse(JSON.stringify(identity))
+          );
+          setUser({
+            wallet: wallet_address,
+            privateKey: identity.privateKey,
+          });
+        }
+      } else {
+        alert("Please install MetaMask or another Ethereum wallet provider.");
       }
-    } else {
-      await lf.setItem("temp_address:current", wallet_address);
-      setUser({
-        wallet: wallet_address,
-        privateKey: identity.privateKey,
-      });
-      return;
-    }
-    if (!isNil(tx) && isNil(tx.err)) {
-      identity.tx = tx;
-      identity.linked_address = wallet_address;
-      await lf.setItem("temp_address:current", wallet_address);
-      await lf.setItem(
-        `temp_address:${contractTxId}:${wallet_address}`,
-        JSON.parse(JSON.stringify(identity))
-      );
-      setUser({
-        wallet: wallet_address,
-        privateKey: identity.privateKey,
-      });
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred during login. Please try again.");
     }
   };
 
@@ -95,7 +104,6 @@ export const WalletProvider = ({ children }) => {
     }
   };
 
-  // Reset WeaveDB connection when user logs out
   useEffect(() => {
     if (!user && !db) {
       setupWeaveDB();
