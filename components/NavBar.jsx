@@ -11,7 +11,12 @@ export default function NavBar() {
       await logout();
     } else {
       if (isDbReady) {
-        await login();
+        try {
+          await login();
+        } catch (error) {
+          console.error("Login failed:", error);
+          alert(error.message || "Login failed. Please try again.");
+        }
       } else {
         alert("Please wait, the database is initializing.");
       }
