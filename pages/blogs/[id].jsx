@@ -334,12 +334,12 @@ const BlogDetails = () => {
           >
             Edit
           </button>
-          <button
+          {/* <button
             onClick={handleDelete}
             className="bg-red-500 text-white px-4 py-2 rounded-lg"
           >
             Delete
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
