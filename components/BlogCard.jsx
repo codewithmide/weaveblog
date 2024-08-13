@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
+import ReactMarkdown from "react-markdown";
 
 const BlogCard = ({ blog }) => {
   const router = useRouter();
@@ -8,14 +9,19 @@ const BlogCard = ({ blog }) => {
     router.push(`/blogs/${blog.id}`);
   };
 
+  const truncatedContent = blog.data.content.split(' ').slice(0, 30).join(' ') + '...';
+
+  console.log("Original content:", blog.data.content);
+  console.log("Truncated content:", truncatedContent);
+
   return (
     <div
       className="w-full lg:h-[320px] p-0 center hover:opacity-90 duration-300 transition-all border-gray-700 rounded-lg border cursor-pointer"
       onClick={handleCardClick}
     >
       <div className="w-full h-full center lg:flex-row flex-col-reverse">
-      <div className="lg:w-[30%] w-full h-full center">
-        {blog.data.image && (
+        <div className="lg:w-[30%] w-full h-full center">
+          {blog.data.image && (
             <img
               src={blog.data.image}
               alt="Blog Image"
@@ -27,14 +33,17 @@ const BlogCard = ({ blog }) => {
           <div className="text-3xl leading-8 font-bold clash">
             {blog.data.title}
           </div>
-          <div>{blog.data.content?.substring(0, 100)}...</div>
+          <div className="markdown-preview">
+            <ReactMarkdown>
+              {truncatedContent}
+            </ReactMarkdown>
+          </div>
           <div className="mt-6 between flex-col md:flex-row md:gap-0 gap-6">
             <div className="flex gap-2 center">
               <p>{new Date(blog.data.date).toLocaleDateString()}</p>
             </div>
           </div>
         </div>
-        
       </div>
     </div>
   );

@@ -25,17 +25,16 @@ const BlogDetails = () => {
   const handleEdit = () => {
     router.push({
       pathname: "/create",
-      query: { id: id }
+      query: { id: id },
     });
   };
 
-//   console.log("Blog: ", blog)
-//   console.log("ID: ", id)
-
+  //   console.log("Blog: ", blog)
+  //   console.log("ID: ", id)
 
   const handleDelete = async () => {
     try {
-        console.log(blog.id)
+      console.log(blog.id);
       await db.delete("blogs", id);
       router.push("/my-blogs");
     } catch (error) {
@@ -77,11 +76,13 @@ const BlogDetails = () => {
           <span style={{ fontWeight: "bold" }}>Author:</span> {blog.author}
         </div>
         <div fontSize="sm" className="my-2">
-          <span style={{ fontWeight: "bold" }}>Date:</span> {new Date(parseInt(blog.date) * 1000).toLocaleString()}
+          <span style={{ fontWeight: "bold" }}>Date:</span>{" "}
+          {new Date(parseInt(blog.date) * 1000).toLocaleString()}
         </div>
         {blog.modifiedDate && (
           <div fontSize="sm" className="mb-10">
-            <span style={{ fontWeight: "bold" }}>Modified:</span> {new Date(parseInt(blog.modifiedDate) * 1000).toLocaleString()}
+            <span style={{ fontWeight: "bold" }}>Modified:</span>{" "}
+            {new Date(parseInt(blog.modifiedDate) * 1000).toLocaleString()}
           </div>
         )}
         {blog.image && (
@@ -94,6 +95,7 @@ const BlogDetails = () => {
         <ReactMarkdown
           components={{
             code({ node, inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || "");
               return !inline ? (
                 <pre
                   style={{
@@ -101,21 +103,41 @@ const BlogDetails = () => {
                     padding: "15px",
                     borderRadius: "5px",
                     margin: "20px 0",
+                    overflowX: "auto",
                   }}
                 >
-                  <code className={className} {...props}>
+                  <code
+                    className={className}
+                    style={{ fontFamily: "monospace", fontSize: "14px" }}
+                    {...props}
+                  >
                     {children}
                   </code>
                 </pre>
               ) : (
-                <code style={{ backgroundColor: "#f6f8fa", padding: "3px" }}>
+                <code
+                  style={{
+                    backgroundColor: "#f6f8fa",
+                    padding: "3px 5px",
+                    borderRadius: "3px",
+                    fontFamily: "monospace",
+                    fontSize: "14px",
+                  }}
+                >
                   {children}
                 </code>
               );
             },
             a({ node, ...props }) {
               return (
-                <a style={{ color: "#1a0dab", fontSize: "18px" }} {...props} />
+                <a
+                  style={{
+                    color: "blue",
+                    textDecoration: "underline",
+                    fontSize: "18px",
+                  }}
+                  {...props}
+                />
               );
             },
             p({ node, ...props }) {
@@ -124,7 +146,32 @@ const BlogDetails = () => {
                   style={{
                     textAlign: "left",
                     fontSize: "18px",
+                    lineHeight: "1.6",
                     margin: "20px 0",
+                  }}
+                  {...props}
+                />
+              );
+            },
+            ul({ node, ...props }) {
+              return (
+                <ul
+                  style={{
+                    paddingLeft: "30px",
+                    marginBottom: "20px",
+                    listStyleType: "disc",
+                  }}
+                  {...props}
+                />
+              );
+            },
+            ol({ node, ...props }) {
+              return (
+                <ol
+                  style={{
+                    paddingLeft: "30px",
+                    marginBottom: "20px",
+                    listStyleType: "decimal",
                   }}
                   {...props}
                 />
@@ -133,7 +180,12 @@ const BlogDetails = () => {
             li({ node, ...props }) {
               return (
                 <li
-                  style={{ textAlign: "justify", margin: "0px 20px" }}
+                  style={{
+                    marginBottom: "10px",
+                    fontSize: "18px",
+                    lineHeight: "1.6",
+                    display: "list-item",
+                  }}
                   {...props}
                 />
               );
@@ -143,8 +195,10 @@ const BlogDetails = () => {
                 style={{
                   fontWeight: "bold",
                   fontSize: "2.5em",
-                  marginBottom: "-20px",
-                  marginTop: "30px",
+                  marginBottom: "20px",
+                  marginTop: "40px",
+                  borderBottom: "1px solid #eaecef",
+                  paddingBottom: "10px",
                 }}
                 {...props}
               />
@@ -154,8 +208,10 @@ const BlogDetails = () => {
                 style={{
                   fontWeight: "bold",
                   fontSize: "2em",
-                  marginBottom: "-20px",
-                  marginTop: "30px",
+                  marginBottom: "20px",
+                  marginTop: "40px",
+                  borderBottom: "1px solid #eaecef",
+                  paddingBottom: "10px",
                 }}
                 {...props}
               />
@@ -165,8 +221,8 @@ const BlogDetails = () => {
                 style={{
                   fontWeight: "bold",
                   fontSize: "1.5em",
-                  marginBottom: "-20px",
-                  marginTop: "20px",
+                  marginBottom: "15px",
+                  marginTop: "30px",
                 }}
                 {...props}
               />
@@ -176,8 +232,8 @@ const BlogDetails = () => {
                 style={{
                   fontWeight: "bold",
                   fontSize: "1.25em",
-                  marginBottom: "-20px",
-                  marginTop: "20px",
+                  marginBottom: "15px",
+                  marginTop: "30px",
                 }}
                 {...props}
               />
@@ -187,7 +243,7 @@ const BlogDetails = () => {
                 style={{
                   fontWeight: "bold",
                   fontSize: "1em",
-                  marginBottom: "-20px",
+                  marginBottom: "15px",
                   marginTop: "20px",
                 }}
                 {...props}
@@ -197,27 +253,76 @@ const BlogDetails = () => {
               <h6
                 style={{
                   fontWeight: "bold",
-                  fontSize: "0.75em",
-                  marginBottom: "-20px",
+                  fontSize: "0.875em",
+                  marginBottom: "15px",
                   marginTop: "20px",
+                  color: "#6a737d",
                 }}
                 {...props}
               />
             ),
-            blockquote: ({ node, ...props }) => {
-              return (
-                <blockquote
-                  style={{
-                    borderLeft: "4px solid #ddd",
-                    paddingLeft: "20px",
-                    color: "#666",
-                    fontStyle: "italic",
-                    margin: "20px 0",
-                  }}
-                  {...props}
-                />
-              );
-            },
+            blockquote: ({ node, ...props }) => (
+              <blockquote
+                style={{
+                  borderLeft: "4px solid #dfe2e5",
+                  paddingLeft: "20px",
+                  color: "#6a737d",
+                  fontStyle: "italic",
+                  margin: "20px 0",
+                }}
+                {...props}
+              />
+            ),
+            table: ({ node, ...props }) => (
+              <table
+                style={{
+                  borderCollapse: "collapse",
+                  width: "100%",
+                  marginBottom: "20px",
+                }}
+                {...props}
+              />
+            ),
+            th: ({ node, ...props }) => (
+              <th
+                style={{
+                  border: "1px solid #dfe2e5",
+                  padding: "10px",
+                  backgroundColor: "#f6f8fa",
+                }}
+                {...props}
+              />
+            ),
+            td: ({ node, ...props }) => (
+              <td
+                style={{
+                  border: "1px solid #dfe2e5",
+                  padding: "10px",
+                }}
+                {...props}
+              />
+            ),
+            img: ({ node, ...props }) => (
+              <img
+                style={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  display: "block",
+                  margin: "20px auto",
+                }}
+                {...props}
+              />
+            ),
+            hr: ({ node, ...props }) => (
+              <hr
+                style={{
+                  border: "none",
+                  borderTop: "1px solid #dfe2e5",
+                  margin: "20px 0",
+                }}
+                {...props}
+              />
+            ),
           }}
         >
           {blog.content}
