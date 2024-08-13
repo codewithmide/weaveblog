@@ -77,12 +77,12 @@ const BlogDetails = () => {
         </div>
         <div fontSize="sm" className="my-2">
           <span style={{ fontWeight: "bold" }}>Date:</span>{" "}
-          {new Date(parseInt(blog.date) * 1000).toLocaleString()}
+          {new Date(blog.date).toLocaleString()}
         </div>
         {blog.modifiedDate && (
           <div fontSize="sm" className="mb-10">
             <span style={{ fontWeight: "bold" }}>Modified:</span>{" "}
-            {new Date(parseInt(blog.modifiedDate) * 1000).toLocaleString()}
+            {new Date(blog.modifiedDate).toLocaleString()}
           </div>
         )}
         {blog.image && (
